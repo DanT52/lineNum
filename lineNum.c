@@ -22,33 +22,48 @@ if not found, or the error number if an error occurs.
 **********************************************************************/
 int lineNum(char *dictionaryName, char *word, int length) {
 
-	char buffer[32];
-	int dict_length;
-	int current_middle;
-	int prev_middle;
+	
 
-	int left =0;
+	char buffer[32];
+	
+	int dict_length;
+	
+	
+	int prev_middle;
+	int left = 0;
+	
 	int right;
 	int mid;
 
+
 	trimbuff(word, length); //trim word
 
+
 	//open the dictionary file
-	int fd = open("test.txt", O_RDONLY);
+	int fd = open(dictionaryName, O_RDONLY);
 	if (fd< 0){
 		fprintf(stderr, "ERROR: #%d : %s  \n", errno, strerror(errno));
 		return 1;
 	}
 
-	dict_length = lseek(fd, 0, SEEK_END) / length;
-	right = dict_length;
+	dict_length = lseek(fd, 0, SEEK_END);
 
-	lseek(fd, 0, SEEK_SET);
+	right = dict_length /length;
 
-	current_middle = dict_length / 2;
+	printf("dict num of words: %d \n", right);
+
+	
+
+	
 
 	while (left <= right){
+
 		mid = (left + right) / 2;
+
+		printf("current middle: %d \n", mid);
+
+		lseek(fd, mid*length, SEEK_SET);
+		read(fd, buffer, length);
 
 
 		//trim dict word
@@ -57,42 +72,44 @@ int lineNum(char *dictionaryName, char *word, int length) {
 
 		//str cmp
 
+		int result = strcmp(word, buffer);
 
-		//word matches
+		if (result == 0){
+			return mid +1;
+			//word matches
 
-		
+		}
 
-		// word is larger ignore left half
-		left = mid +1;
+		if (result > 0 ){
+			// word is larger ignore left half
+			left = mid +1;
+
+		} else {
+			//word is smaller ignore right half
+
+			right = mid -1;
+
+		}
 
 
-		//word is smaller ignore right half
-
-		right = mid -1;
-
-		//if current middle is past middle then not found.
-
-
-
-		
 		
 	}
 
-	return -mid;
-
+	return -(mid +1);
 
 	
-	//insert your code here
-	return 0;
 }
 
 void trimbuff(char* buff, int buff_len){
 	int i =0;
 
+
+
 	while(1){
 		
-		if (buff[i] == ' ' || buff[i] == '/n' || i == buff_len -1 || buff[i] == '\0'){
+		if (buff[i] == ' ' || buff[i] == '\n' || i == buff_len -1 || buff[i] == '\0'){
 			buff[i]= '\0';
+			return;
 		}
 
 		i++;
@@ -104,29 +121,18 @@ void trimbuff(char* buff, int buff_len){
 
 int main(int argc, char const *argv[])
 {
-	char buff[9];
-	int width = 9;
-	int middle = 0;
+	// char testString[] = "cat";
 
-	int fd = open("tiny_9", O_RDONLY);
-	if (fd< 0){
-		fprintf(stderr, "ERROR: #%d : %s  \n", errno, strerror(errno));
-		return 1;
-	}
+	// trimbuff(testString, 9);
 
-	int dict_length = lseek(fd, 0, SEEK_END);
-	printf("seeked curr: %d \n", dict_length);
+	// printf("testtrim: %s \n", testString);
 
-	middle = (dict_length/width)/2;
+	char file[] = "tiny_9";
+	char word[] = "cow";
+	
 
-	dict_length = lseek(fd, middle*width, SEEK_SET);
-	printf("seeked curr: %d \n", dict_length);
-
-	int reader = read(fd, buff, 9);
-	dict_length = lseek(fd, 0, SEEK_CUR);
-	printf("seeked curr: %d \n", dict_length);
-
-	printf("letters %s \n",buff);
+	int result = lineNum(file, word, 9);
+	printf("line num: %d \n", result);
 
 	return 0;
 }
