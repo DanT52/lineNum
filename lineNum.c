@@ -24,7 +24,7 @@ if not found, or the error number if an error occurs.
 **********************************************************************/
 int lineNum(char *dictionaryName, char *word, int length) {
 
-	char *buffer = malloc(length+1);										//malloc buffer
+	char *buffer = calloc(length+1,1);										//allocate buffer
 	if(!buffer) return exiter(-1, NULL,"Failed to allocate buffer.", 0);	//ensure allocation worked
 	int dict_length, left = 0, right, mid;									//Create variables for the binary search
 
