@@ -14,7 +14,7 @@ description:
 #include <errno.h>
 
 int lineNum(char *dictionaryName, char *word, int length);
-int exiter(int fd, char *msg, int lineNumber);
+int exiter(int fd, char *buffer, char *word, char *msg, int lineNumber);
 void cpy_word(char *entered_word, char *word, int buff_len);
 
 /**********************************************************************
@@ -25,33 +25,35 @@ if not found, or the error number if an error occurs.
 int lineNum(char *dictionaryName, char *entered_word, int length){
 
 	int dict_length, right, left=0, mid;
-	char buffer[length], word[length];
+	char *buffer = (char *)malloc(length * sizeof(char));		//allocate space for buffer and entered word copy.
+    char *word = (char *)malloc(length * sizeof(char));
+	if (!word || !buffer)return exiter(-1, buffer, word, "Failed to allocate memory",0);
 	cpy_word(entered_word, word, length);
 
 	int fd = open(dictionaryName, O_RDONLY);						//open the dictionary
-	if (fd == -1)return exiter(fd, "Failed to open file.", 0);
+	if (fd == -1)return exiter(fd, buffer, word, "Failed to open file.", 0);
 	
 	dict_length = lseek(fd, 0, SEEK_END);							//seek to end of file to determine total length
-	if (dict_length == -1)return exiter(fd, "Failed to seek", 0);
+	if (dict_length == -1)return exiter(fd, buffer, word, "Failed to seek", 0);
 	right = dict_length /length; 	//set right pointer for binary search to the last line
 
 	while (left <= right){			//binary search is to run while left pointer is not equal to right
 
 		mid = (left + right) / 2;	//set the current middle word
-		
+
 		//Seek too and read the middle word into buffer
-		if (lseek(fd, mid*length, SEEK_SET)==-1)return exiter(fd, "Failed to seek", 0);
-		if (read(fd, buffer, length) != length)return exiter(fd, "Failed to read word from dictionary.", 0);
+		if (lseek(fd, mid*length, SEEK_SET)==-1)return exiter(fd, buffer, word, "Failed to seek", 0);
+		if (read(fd, buffer, length) != length)return exiter(fd, buffer, word, "Failed to read word from dictionary.", 0);
 		buffer[length-1] = '\0'; // null terminate buffer.
 		
 		int result = strcmp(word, buffer);	//compare entered word to word in buffer	
-		if (result == 0)return  exiter(fd, NULL, (mid+1)); 	//The word matches we found the line.
+		if (result == 0)return  exiter(fd, buffer, word, NULL, (mid+1)); 	//The word matches we found the line.
 		if (result > 0 )left = mid +1;						//word is larger ignore left half
 		if (result < 0)right = mid -1;						//word is smaller ignore right half
 	}
 
 	//we reached the end of the binary search without finding the word
-	return exiter(fd, NULL, -(mid+1));
+	return exiter(fd, buffer, word, NULL, -(mid+1));
 	
 }
 //Copies entered word into word
@@ -75,13 +77,15 @@ void cpy_word(char *entered_word, char *word, int buff_len){
 //msg:			custom error message, pass null if no error
 //lineNumber:	line number to return if sucess, pass 0 otherwise.
 //@return 		returns the provided lineNumber on success or errno on failure.
-int exiter(int fd, char *msg, int lineNumber){
+int exiter(int fd, char *buffer, char *word, char *msg, int lineNumber){
 	 // display custom error message if provided
 	if(msg)fprintf(stderr, "ERROR: %s Error#: '%d' Error Msg: '%s'\n", msg, errno, strerror(errno));
 	
 	if (fd != -1){	// close the file descriptor if valid
 		if (close(fd) == -1)fprintf(stderr, "Error Closing File\n Error#: %d \n Message: %s  \n", errno, strerror(errno));
 	}
+	if(buffer)free(buffer);
+	if(word)free(word);
 	// return the provided line number if non-zero, otherwise return the error number
 	if(lineNumber != 0) return lineNumber;
 	return errno;
