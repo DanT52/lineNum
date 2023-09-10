@@ -27,9 +27,9 @@ int lineNum(const char *file, const char *word, int num);
 int main(int argc, char const *argv[]){
 
     // Define test cases
-    char* words[] = {"acid", "a b c", "readable", "readable"};
-    char* dicts[] = {"tiny_9", "webster_16", "webster_no_read", "asdfsdfsad"};
-    int nums[] = {9, 16, 16, 16};  // Assuming a width of 16 for the last dictionary, adjust as necessary
+    char* words[] = {"000", "youth", "zoo", "a b c"};
+    char* dicts[] = {"tiny_9", "tiny_9", "tiny_9", "tiny_9"};
+    int nums[] = {9, 9, 9, 9};  // Assuming a width of 16 for the last dictionary, adjust as necessary
     int num_tests = sizeof(words) / sizeof(words[0]);
 
     for(int i = 0; i < num_tests; i++) {
