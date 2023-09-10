@@ -87,6 +87,8 @@ int exiter(int fd, char *buffer, char *word, char *msg, int lineNumber){
 	if(buffer)free(buffer);
 	if(word)free(word);
 	// return the provided line number if non-zero, otherwise return the error number
-	if(lineNumber != 0) return lineNumber;
-	return errno;
+	if(lineNumber ==0)return errno;
+	if(lineNumber < 0)return lineNumber +1;		//the word was not found
+	return lineNumber;
+	
 }
