@@ -43,7 +43,7 @@ int lineNum(char *dictionaryName, char *entered_word, int length){
 
 		//Seek too and read the middle word into buffer
 		if (lseek(fd, mid*length, SEEK_SET)==-1)return exiter(fd, buffer, word, "Failed to seek", 0);
-		if (read(fd, buffer, length) != length)return exiter(fd, buffer, word, "Failed to read word from dictionary.", 0);
+		if (read(fd, buffer, length) == -1)return exiter(fd, buffer, word, "Failed to read word from dictionary.", 0);
 		buffer[length-1] = '\0'; // null terminate buffer.
 		
 		int result = strcmp(word, buffer);	//compare entered word to word in buffer	
