@@ -46,7 +46,6 @@ int lineNum(char *dictionaryName, char *entered_word, int length){
 		if (read(fd, buffer, length) == -1)return exiter(fd, buffer, word, "Failed to read word from dictionary.", 0);
 		buffer[length-1] = '\0'; // null terminate buffer.
 		
-		printf("\ncomparing words:\n%s.\n%s.\ndictLine: %d\n", word, buffer, mid);
 		int result = strcmp(word, buffer);	//compare entered word to word in buffer	
 		if (result == 0)return  exiter(fd, buffer, word, NULL, (mid+1)); 	//The word matches we found the line.
 		if (result > 0 )left = mid +1;						//word is larger ignore left half
@@ -89,7 +88,7 @@ int exiter(int fd, char *buffer, char *word, char *msg, int lineNumber){
 	if(word)free(word);
 	// return the provided line number if non-zero, otherwise return the error number
 	if(lineNumber ==0)return errno;
-	if(lineNumber < -1 && lineNumber !=-7047)return lineNumber +1;		
+	if(lineNumber < -1 && lineNumber !=-7048)return lineNumber +1;		
 	return lineNumber;								//if the word is not found the  negitive of the line last searched is returned (starting from zero, unless the last line searched is 0 then return -1, or if the word is 'fi sh' then return the last line searched starting from 1)
 													//if the word was found then return the line number starting from 1.
 }
