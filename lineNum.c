@@ -24,7 +24,7 @@ if not found, or the error number if an error occurs.
 **********************************************************************/
 int lineNum(char *dictionaryName, char *entered_word, int length){
 
-	int dict_length, right, left=0, mid;
+	int dict_length, right, left=1, mid;
 	char *buffer = (char *)malloc(length * sizeof(char));		//allocate space for buffer and entered word copy.
     char *word = (char *)malloc(length * sizeof(char));
 	if (!word || !buffer)return exiter(-1, buffer, word, "Failed to allocate memory",0);
@@ -39,21 +39,21 @@ int lineNum(char *dictionaryName, char *entered_word, int length){
 
 	while (left <= right){			//binary search is to run while left pointer is not equal to right
 
-		mid = (left + right) / 2;	//set the current middle word
+		mid = left +(right-left) / 2;	//set the current middle word
 
 		//Seek too and read the middle word into buffer
-		if (lseek(fd, mid*length, SEEK_SET)==-1)return exiter(fd, buffer, word, "Failed to seek", 0);
+		if (lseek(fd, (mid*length)-length, SEEK_SET)==-1)return exiter(fd, buffer, word, "Failed to seek", 0);
 		if (read(fd, buffer, length) == -1)return exiter(fd, buffer, word, "Failed to read word from dictionary.", 0);
 		buffer[length-1] = '\0'; // null terminate buffer.
 		
 		int result = strcmp(word, buffer);	//compare entered word to word in buffer	
-		if (result == 0)return  exiter(fd, buffer, word, NULL, (mid+1)); 	//The word matches we found the line.
+		if (result == 0)return  exiter(fd, buffer, word, NULL, (mid)); 	//The word matches we found the line.
 		if (result > 0 )left = mid +1;						//word is larger ignore left half
 		if (result < 0)right = mid -1;						//word is smaller ignore right half
 	}
 
 	//we reached the end of the binary search without finding the word
-	return exiter(fd, buffer, word, NULL, -(mid+1));
+	return exiter(fd, buffer, word, NULL, -(mid));
 	
 }
 //Copies entered word into word
@@ -88,7 +88,5 @@ int exiter(int fd, char *buffer, char *word, char *msg, int lineNumber){
 	if(word)free(word);
 	// return the provided line number if non-zero, otherwise return the error number
 	if(lineNumber ==0)return errno;
-	if(lineNumber < -1 && lineNumber !=-7048)return lineNumber +1;		
-	return lineNumber;								//if the word is not found the  negitive of the line last searched is returned (starting from zero, unless the last line searched is 0 then return -1, or if the word is 'fi sh' then return the last line searched starting from 1)
-													//if the word was found then return the line number starting from 1.
+	return lineNumber; //last line searched is returned, negitive if not found.
 }
