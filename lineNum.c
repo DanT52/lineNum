@@ -26,9 +26,9 @@ int lineNum(char *dictionaryName, char *entered_word, int length){
 
 	int dict_length, right, left=1, mid;
 	char *buffer = (char *)malloc(length * sizeof(char));		//allocate space for buffer and entered word copy.
-    char *word = (char *)malloc(length * sizeof(char));
+    	char *word = (char *)malloc(length * sizeof(char));
 	if (!word || !buffer)return exiter(-1, buffer, word, "Failed to allocate memory",0);
-	cpy_word(entered_word, word, length);
+	cpy_word(entered_word, word, length);	//the entered word is copied and truncated if nesessary.
 
 	int fd = open(dictionaryName, O_RDONLY);						//open the dictionary
 	if (fd == -1)return exiter(fd, buffer, word, "Failed to open file.", 0);
@@ -48,8 +48,8 @@ int lineNum(char *dictionaryName, char *entered_word, int length){
 		
 		int result = strcmp(word, buffer);	//compare entered word to word in buffer	
 		if (result == 0)return  exiter(fd, buffer, word, NULL, (mid)); 	//The word matches we found the line.
-		if (result > 0 )left = mid +1;						//word is larger ignore left half
-		if (result < 0)right = mid -1;						//word is smaller ignore right half
+		if (result > 0 )left = mid +1;					//word is larger ignore left half
+		if (result < 0)right = mid -1;					//word is smaller ignore right half
 	}
 
 	//we reached the end of the binary search without finding the word
